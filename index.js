@@ -1,52 +1,47 @@
+// Game Variables
 var buttonColors = ["red", "blue", "green", "yellow"];
 var gamePattern = [];
 var userClickedPattern = [];
 var started = false;
 var level = 0;
 
-// Start the game on keypress
-document.addEventListener("keydown", function () {
+// Start the game on keypress or tap
+$(document).on("keydown touchstart", function () {
   if (!started) {
-    document.getElementById("level-title").innerHTML = "Level " + level;
+    $("#level-title").text("Level " + level);
     nextSequence();
     started = true;
   }
 });
 
-// Handle button clicks
-var buttons = document.querySelectorAll(".btn");
-for (var i = 0; i < buttons.length; i++) {
-  buttons[i].addEventListener("click", function () {
-    var userChosenColor = this.id;
-    userClickedPattern.push(userChosenColor);
+// Detect button clicks or taps
+$(".btn").on("click touchstart", function () {
+  var userChosenColor = $(this).attr("id");
+  userClickedPattern.push(userChosenColor);
 
-    playSound(userChosenColor);
-    animatePress(userChosenColor);
+  playSound(userChosenColor);
+  animatePress(userChosenColor);
 
-    checkAnswer(userClickedPattern.length - 1);
-  });
-}
+  checkAnswer(userClickedPattern.length - 1);
+});
 
 // Generate the next sequence
 function nextSequence() {
   userClickedPattern = [];
   level++;
-  document.getElementById("level-title").innerHTML = "Level " + level;
+  $("#level-title").text("Level " + level);
 
   var randomNumber = Math.floor(Math.random() * 4);
   var randomChosenColor = buttonColors[randomNumber];
   gamePattern.push(randomChosenColor);
 
-  setTimeout(function () {
-    document.getElementById(randomChosenColor).classList.add("pressed");
-    playSound(randomChosenColor);
-    setTimeout(function () {
-      document.getElementById(randomChosenColor).classList.remove("pressed");
-    }, 100);
-  }, 500);
+  $("#" + randomChosenColor)
+    .fadeOut(100)
+    .fadeIn(100);
+  playSound(randomChosenColor);
 }
 
-// Check the user's answer
+// Check user's answer
 function checkAnswer(currentLevel) {
   if (gamePattern[currentLevel] === userClickedPattern[currentLevel]) {
     if (userClickedPattern.length === gamePattern.length) {
@@ -54,17 +49,17 @@ function checkAnswer(currentLevel) {
     }
   } else {
     playSound("wrong");
-    document.body.classList.add("game-over");
+    $("body").addClass("game-over");
     setTimeout(function () {
-      document.body.classList.remove("game-over");
+      $("body").removeClass("game-over");
     }, 200);
 
-    document.getElementById("level-title").innerHTML = "Game Over, Press Any Key to Restart";
+    $("#level-title").text("Game Over, Tap Anywhere to Restart");
     startOver();
   }
 }
 
-// Play sound
+// Play sound function
 function playSound(name) {
   var audio = new Audio("sounds/" + name + ".mp3");
   audio.play();
@@ -72,14 +67,13 @@ function playSound(name) {
 
 // Animate button press
 function animatePress(currentColor) {
-  var activeButton = document.getElementById(currentColor);
-  activeButton.classList.add("pressed");
+  $("#" + currentColor).addClass("pressed");
   setTimeout(function () {
-    activeButton.classList.remove("pressed");
+    $("#" + currentColor).removeClass("pressed");
   }, 100);
 }
 
-// Reset the game
+// Restart the game
 function startOver() {
   level = 0;
   gamePattern = [];
